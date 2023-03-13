@@ -1,0 +1,31 @@
+<div class="navbar">
+    {% load static %}
+    <div class="logo">
+        <img src="{% static 'customer/images/logo.png' %}" width="125px">
+    </div>
+    <nav>
+        <ul id="MenuItems">
+            <li><a href="">Home</a></li>
+            <li><a href="{%url 'products' %}">Products</a></li>
+            <li><a href="">About</a></li>
+            {% if user.is_authenticated  %}
+                                <li>
+                                    <a href=""><i class="fas fa-user-edit mr-2"></i>Hi,{{user.first_name}}</a>
+                                </li>
+                                <li>
+                                    <a href="{%url 'logoutcustomer'%}"><i class="fas fa-sign-out-alt mr-2"></i>Logout</a>
+                                </li>
+                                {% else %}
+                                <li>
+                                    <a href="{% url 'registercustomer' %}"><i class="fas fa-user-edit mr-2"></i>Register</a>
+                                </li>
+                                <li>
+                                    <a href="{%url 'logincustomer'%}"><i class="fas fa-sign-in-alt mr-2"></i>Login</a>
+                                </li>
+                                {% endif %}
+        </ul>
+
+    </nav>
+    <a href="{%url 'viewcustomercart'%}"><img src="{% static 'customer/images/cart.png' %}" width="30px" height="30px"></a>
+    <img src="{% static 'customer/images/menu.png' %}" class="menu-icon" onclick="menutoggle()">
+</div>
