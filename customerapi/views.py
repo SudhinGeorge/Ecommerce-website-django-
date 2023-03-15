@@ -3,6 +3,8 @@ from django.shortcuts import render
 # Create your views here.
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate
+from adminpannel.models import Products
+from customer.models import CustomerCart
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from customer.forms import RegistrationForm
@@ -10,6 +12,7 @@ from django.contrib.auth.models import User
 from django.http import Http404, HttpResponse, JsonResponse
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
+from .serializer import ProductsListSerializer, CustomerCartSerializer
 
 from rest_framework.status import (
     HTTP_200_OK,
@@ -71,3 +74,63 @@ def logincustomer(request):
 def logoutcustomer(request):
     request.user.auth_token.delete()
     return Response({'message':'success'},status=HTTP_200_OK)
+
+
+@csrf_exempt
+@api_view(["POST"])
+def listproducts(request):
+    products = Products.objects.filter(is_active=1)
+    if request.user:
+        context = {'userid':request.user.id}
+    serializer = ProductsListSerializer(products,many=True,context=context)
+    return Response(serializer.data,status=HTTP_200_OK)
+
+@csrf_exempt
+@api_view(["POST"])
+def productdetails(request):
+    product_id = int(request.data.get("product"))
+    product = Products.objects.get(id = product_id)
+    if request.user:
+        context = {'userid':request.user.id}
+    serializer = ProductsListSerializer(product,context=context)
+    return Response(serializer.data,status=HTTP_200_OK)
+
+
+@csrf_exempt
+@api_view(["POST"])
+def addproductcart(request):
+    product_id = int(request.data.get("product"))
+    user = request.user
+    cart_instance = CustomerCart(product_id = product_id,
+                                customer = user)
+    cart_instance.save()
+    return Response({'result':'success'})
+
+@csrf_exempt
+@api_view(["POST"])
+def removeproductfromcart(request):
+    product_id = int(request.data.get("product"))
+    user = request.user
+    cart_instance = CustomerCart.objects.filter(customer = user,product=product_id)
+    cart_instance.delete()
+    return Response({'result':'success'})
+
+@csrf_exempt
+@api_view(["POST"])
+def listcustomercart(request):
+    usercart = CustomerCart.objects.filter(customer = request.user).select_related('product')
+    totalprice = sum(item.product.price for item in usercart)
+    cartserialized = CustomerCartSerializer(usercart,many = True)
+    return Response({'cartitems':cartserialized.data,'totalprice':totalprice})
+
+
+
+
+
+
+
+
+
+
+
+
