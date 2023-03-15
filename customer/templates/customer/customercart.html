@@ -47,7 +47,7 @@
                 <td>&#8377; {{totalprice}}</td>
             </tr>	
         </table>
-        <form action="" method="POST">
+        <form action="{% url 'checkoutcustomer' %}" method="POST">
 
             {%csrf_token%}
             <div class="form-group">
